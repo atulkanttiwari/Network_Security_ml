@@ -1,10 +1,10 @@
 python-dotenv
 pandas
 numpy
-matplotlib
 setuptools
 pymongo[srv]==3.12
 pymongo
 certifi
+scikit-learn
 
 # -e .
