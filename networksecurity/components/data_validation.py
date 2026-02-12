@@ -66,46 +66,60 @@ class DataValidation:
         except Exception as e:
             raise NetworkSecurityException(e,sys)
         
-    def initiate_data_validation(self)->DataValidationArtifact:
+    def initiate_data_validation(self) -> DataValidationArtifact:
         try:
             train_file_path = self.data_ingestion_artifact.trained_file_path
             test_file_path = self.data_ingestion_artifact.test_file_path
-            
-            ## read the data from train and test
+
+            # Read the data
             train_dataframe = DataValidation.read_data(train_file_path)
             test_dataframe = DataValidation.read_data(test_file_path)
-            
-            ## validate number of columns
-            status = self.validate_number_of_columns(dataframe=train_dataframe)
-            if not status:
-                error_message = f"Train dataframe does not contain all columns.\n"
-            status = self.validate_number_of_columns(dataframe=test_dataframe)
-            if not status:
-                error_message=f"Test dataframe does not contain all columns.\n"
-                
-            ## lets check datadrift
-            status = self.detect_dataset_drift(base_df=train_dataframe,current_df=test_dataframe)
+
+            # Validate number of columns
+            train_status = self.validate_number_of_columns(dataframe=train_dataframe)
+            if not train_status:
+                raise Exception("Train dataframe does not contain all required columns.")
+
+            test_status = self.validate_number_of_columns(dataframe=test_dataframe)
+            if not test_status:
+                raise Exception("Test dataframe does not contain all required columns.")
+
+            # Check data drift
+            drift_status = self.detect_dataset_drift(
+                base_df=train_dataframe,
+                current_df=test_dataframe
+            )
+
+            # Create valid data directory
             dir_path = os.path.dirname(self.data_validation_config.valid_train_file_path)
-            os.makedirs(dir_path,exist_ok=True)
-            
+            os.makedirs(dir_path, exist_ok=True)
+
+            # Save validated files
             train_dataframe.to_csv(
-                self.data_validation_config.valid_train_file_path,index=False,header=True
+                self.data_validation_config.valid_train_file_path,
+                index=False,
+                header=True
             )
-            
+
             test_dataframe.to_csv(
-                self.data_validation_config.valid_test_file_path,index=False,header=True
+                self.data_validation_config.valid_test_file_path,
+                index=False,
+                header=True
             )
-            
+
+            # ✅ FIXED: return correct validated paths
             data_validation_artifact = DataValidationArtifact(
-                validation_status=status,
-                valid_train_file_path=self.data_ingestion_artifact.trained_file_path,
-                valid_test_file_path=self.data_ingestion_artifact.test_file_path,
+                validation_status=drift_status,
+                valid_train_file_path=self.data_validation_config.valid_train_file_path,
+                valid_test_file_path=self.data_validation_config.valid_test_file_path,
                 invalid_train_file_path=None,
                 invalid_test_file_path=None,
                 drift_report_file_path=self.data_validation_config.drift_report_file_path,
             )
+    
+            logging.info(f"Data validation artifact: {data_validation_artifact}")
+    
             return data_validation_artifact
-            
+    
         except Exception as e:
-            raise NetworkSecurityException(e,sys)
-        
+            raise NetworkSecurityException(e, sys)
