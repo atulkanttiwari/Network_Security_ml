@@ -29,12 +29,7 @@ from sklearn.ensemble import (
 
 import mlflow
 import dagshub
-
-dagshub.init(
-    repo_owner='atulkanttiwari',
-    repo_name='Network_Security_ml',
-    mlflow=True
-)
+dagshub.init(repo_owner='atulkanttiwari', repo_name='Network_Security_ml', mlflow=True)
 
 
 class ModelTrainer:
