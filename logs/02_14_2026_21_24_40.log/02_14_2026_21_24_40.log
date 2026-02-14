@@ -1,6 +1,0 @@
-[ 2026-02-14 21:24:43,153 1025 httpx - INFO - HTTP Request: GET https://dagshub.com/api/v1/user "HTTP/1.1 200 OK"]
-[ 2026-02-14 21:24:43,153 107 dagshub - INFO - Accessing as atulkanttiwari]
-[ 2026-02-14 21:24:44,429 1025 httpx - INFO - HTTP Request: GET https://dagshub.com/api/v1/repos/atulkanttiwari/End-to-End-Phishing-Detection-System "HTTP/1.1 200 OK"]
-[ 2026-02-14 21:24:45,708 1025 httpx - INFO - HTTP Request: GET https://dagshub.com/api/v1/user "HTTP/1.1 200 OK"]
-[ 2026-02-14 21:24:45,708 107 dagshub - INFO - Initialized MLflow to track repo "atulkanttiwari/End-to-End-Phishing-Detection-System"]
-[ 2026-02-14 21:24:45,708 107 dagshub - INFO - Repository atulkanttiwari/End-to-End-Phishing-Detection-System initialized!]

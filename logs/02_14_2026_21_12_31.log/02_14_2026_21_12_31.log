@@ -1,8 +1,0 @@
-[ 2026-02-14 21:12:34,442 1025 httpx - INFO - HTTP Request: GET https://dagshub.com/api/v1/user "HTTP/1.1 200 OK"]
-[ 2026-02-14 21:12:34,442 107 dagshub - INFO - Accessing as atulkanttiwari]
-[ 2026-02-14 21:12:35,099 1025 httpx - INFO - HTTP Request: GET https://dagshub.com/api/v1/repos/atulkanttiwari/Network_Security_ml "HTTP/1.1 404 Not Found"]
-[ 2026-02-14 21:12:35,099 107 dagshub - INFO - Repository Network_Security_ml doesn't exist, creating it under current user.]
-[ 2026-02-14 21:12:36,672 1025 httpx - INFO - HTTP Request: POST https://dagshub.com/api/v1/user/repos "HTTP/1.1 201 Created"]
-[ 2026-02-14 21:12:37,961 1025 httpx - INFO - HTTP Request: GET https://dagshub.com/api/v1/user "HTTP/1.1 200 OK"]
-[ 2026-02-14 21:12:37,962 107 dagshub - INFO - Initialized MLflow to track repo "atulkanttiwari/Network_Security_ml"]
-[ 2026-02-14 21:12:37,962 107 dagshub - INFO - Repository atulkanttiwari/Network_Security_ml initialized!]
