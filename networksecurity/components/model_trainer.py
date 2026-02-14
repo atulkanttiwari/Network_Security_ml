@@ -1,7 +1,7 @@
 import os
 import sys
 
-from networksecurity.exception.exception import NetworkSecurityException 
+from networksecurity.exception.exception import NetworkSecurityException
 from networksecurity.logging.logger import logging
 
 from networksecurity.entity.artifact_entity import (
@@ -27,8 +27,11 @@ from sklearn.ensemble import (
     RandomForestClassifier,
 )
 
+from xgboost import XGBClassifier  
+
 import mlflow
 import dagshub
+
 dagshub.init(repo_owner='atulkanttiwari', repo_name='Network_Security_ml', mlflow=True)
 
 
@@ -46,40 +49,47 @@ class ModelTrainer:
 
     def train_model(self, X_train, y_train, X_test, y_test):
 
+        #  Models including XGBoost
         models = {
             "Random Forest": RandomForestClassifier(verbose=1),
             "Decision Tree": DecisionTreeClassifier(),
             "Gradient Boosting": GradientBoostingClassifier(verbose=1),
-            "Logistic Regression": LogisticRegression(verbose=1),
+            "Logistic Regression": LogisticRegression(max_iter=1000, verbose=1),
             "AdaBoost": AdaBoostClassifier(),
+            "XGBoost": XGBClassifier(
+                eval_metric='logloss',
+                verbosity=1
+            ),
         }
 
+        #  Hyperparameters including XGBoost
         params = {
             "Decision Tree": {
-                'criterion': ['gini', 'entropy', 'log_loss'],
-                'splitter': ['best', 'random'],
-                'max_features': ['sqrt', 'log2'],
+                'criterion': ['gini', 'entropy'],
+                'max_depth': [None, 10, 20],
             },
             "Random Forest": {
-                'criterion': ['gini', 'entropy', 'log_loss'],
-                'max_features': ['sqrt', 'log2', None],
-                'n_estimators': [8, 16, 32, 128, 256]
+                'n_estimators': [100, 200],
+                'max_depth': [None, 10, 20],
             },
             "Gradient Boosting": {
-                'loss': ['log_loss', 'exponential'],
-                'learning_rate': [.1, .01, .05, .001],
-                'subsample': [0.6, 0.7, 0.75, 0.85, 0.9],
-                'criterion': ['squared_error', 'friedman_mse'],
-                'max_features': ['sqrt', 'log2'],
-                'n_estimators': [8, 16, 32, 64, 128, 256]
+                'learning_rate': [0.1, 0.01],
+                'n_estimators': [100, 200],
             },
             "Logistic Regression": {},
             "AdaBoost": {
-                'learning_rate': [.1, .01, .001],
-                'n_estimators': [8, 16, 32, 64, 128, 256]
+                'learning_rate': [0.1, 0.01],
+                'n_estimators': [100, 200],
+            },
+            "XGBoost": {
+                'n_estimators': [100, 200],
+                'max_depth': [3, 5, 7],
+                'learning_rate': [0.1, 0.01],
+                'subsample': [0.8, 1.0],
             }
         }
 
+        #  Evaluate all models
         model_report: dict = evaluate_models(
             X_train=X_train,
             y_train=y_train,
@@ -97,6 +107,8 @@ class ModelTrainer:
 
         best_model = models[best_model_name]
 
+        logging.info(f"Best model selected: {best_model_name}")
+
         # Predictions
         y_train_pred = best_model.predict(X_train)
         y_test_pred = best_model.predict(X_test)
@@ -111,8 +123,10 @@ class ModelTrainer:
             y_pred=y_test_pred
         )
 
-        # 🔥 Single MLflow run
+        #  MLflow Tracking
         with mlflow.start_run():
+
+            mlflow.log_param("best_model", best_model_name)
 
             mlflow.log_metric("train_f1_score", classification_train_metric.f1_score)
             mlflow.log_metric("train_precision", classification_train_metric.precision_score)
@@ -135,19 +149,19 @@ class ModelTrainer:
         )
         os.makedirs(model_dir_path, exist_ok=True)
 
-        # Create final wrapped model
+        # Wrap model + preprocessor
         network_model = NetworkModel(
             preprocessor=preprocessor,
             model=best_model
         )
 
-        # 🔥 FIXED: Save correct object
+        # Save wrapped model
         save_object(
             self.model_trainer_config.trained_model_file_path,
             obj=network_model
         )
 
-        # Optional final model copy
+        # Optional final_model save
         os.makedirs("final_model", exist_ok=True)
         save_object("final_model/model.pkl", best_model)
 
