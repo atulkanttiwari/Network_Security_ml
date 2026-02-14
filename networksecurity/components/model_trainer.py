@@ -32,7 +32,7 @@ from xgboost import XGBClassifier
 import mlflow
 import dagshub
 
-dagshub.init(repo_owner='atulkanttiwari', repo_name='Network_Security_ml', mlflow=True)
+dagshub.init(repo_owner='atulkanttiwari', repo_name='End-to-End-Phishing-Detection-System', mlflow=True)
 
 
 class ModelTrainer:
